@@ -1,0 +1,15 @@
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.pdb
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\Assembly-CSharp-firstpass.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\Assembly-CSharp.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\UnityEngine.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\UnityEngine.UI.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\KSPTrackIR.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\KSPAssets.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\Mono.Cecil.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\TDx.TDxInput.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\Mono.Security.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\bin\Debug\UnityEngine.xml
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.csprojResolveAssemblyReference.cache
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.dll
+c:\users\patryk\documents\visual studio 2017\Projects\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.pdb

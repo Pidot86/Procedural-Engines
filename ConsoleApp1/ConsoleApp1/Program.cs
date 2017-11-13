@@ -75,7 +75,7 @@ namespace ConsoleApp1 {
 			180.0f, 200.0f, 220.0f,
 			270.0f, 280.0f, 290.0f,
 			290.0f, 300.0f, 310.0f,
-			320.0f, 330.0f, 340.0f,
+			280.0f, 290.0f, 300.0f,
 			270.0f, 280.0f, 290.0f
 		};
 
@@ -132,14 +132,18 @@ namespace ConsoleApp1 {
 		}
 
 		public void ChangeEngineType (int type) {
-			engineType = availableEngines [type];
-			ResetEngineAdvDropdown ();
-			UpdateEngine ();
+			if (GUIDone) {
+				engineType = availableEngines[type];
+				ResetEngineAdvDropdown ();
+				UpdateEngine ();
+			}
 		}
 
 		public void ChangeEngineAdv (int level) {
-			engineAdv = level;
-			UpdateEngine ();
+			if (GUIDone) {
+				engineAdv = level;
+				UpdateEngine ();
+			}
 		}
 
 		public void UpdateEngine (bool updateText = true) {
@@ -151,12 +155,12 @@ namespace ConsoleApp1 {
 
 				p.engineType = this.engineType;
 				p.engineAdv = this.engineAdv;
-				p.ActuallyUpdateEngine (updateText);
+				p.ActuallyUpdateEngine (true);
 			}
 		}
 
 		public void ActuallyUpdateEngine (bool updateText = true) {
-				this.part.Modules.GetModule<ModuleEngines> ().maxFuelFlow = engineBaseThrust[engineType * 3 + engineAdv] / engineBaseVISP[engineType * 3 + engineAdv] / 9.80665f;
+			this.part.Modules.GetModule<ModuleEngines> ().maxFuelFlow = engineBaseThrust[engineType * 3 + engineAdv] / engineBaseVISP[engineType * 3 + engineAdv] / 9.80665f;
 
 			FloatCurve curve = new FloatCurve ();
 			curve.Add (0.0f, engineBaseVISP[engineType * 3 + engineAdv]);
@@ -165,16 +169,16 @@ namespace ConsoleApp1 {
 
 			this.part.Modules.GetModule<ModuleEngines> ().atmosphereCurve = curve;
 
-			try {
-				VIspText.text = $"Vacuum ISP: {engineBaseVISP[engineType * 3 + engineAdv]}s";
-				AIspText.text = $"Sea level ISP: {engineBaseAISP[engineType * 3 + engineAdv]}s";
-				ThrustText.text = $"Vacuum thrust: {engineBaseThrust[engineType * 3 + engineAdv]}kN";
-				MassText.text = $"Mass: {engineBaseMass[engineType * 3 + engineAdv]}t";
-			} catch (Exception ex) {
-				Debug.Log (ex.Message);
-				Debug.Log (ex.Source);
-				Debug.Log (ex.StackTrace);
+			if (updateText && VIspText != null) {
+				UpdateText ();
 			}
+		}
+
+		public void UpdateText () {
+			VIspText.text = $"Vacuum ISP: {engineBaseVISP[engineType * 3 + engineAdv]}s";
+			AIspText.text = $"Sea level ISP: {engineBaseAISP[engineType * 3 + engineAdv]}s";
+			ThrustText.text = $"Vacuum thrust: {engineBaseThrust[engineType * 3 + engineAdv]}kN";
+			MassText.text = $"Mass: {engineBaseMass[engineType * 3 + engineAdv]}t";
 		}
 
 		Canvas mainCanvas;
@@ -186,91 +190,7 @@ namespace ConsoleApp1 {
 		Text AIspText;
 		Text ThrustText;
 		Text MassText;
-
-		public GameObject CreateUIPanel (Transform parent, Vector2 minAnchor, Vector2 maxAnchor, Vector2 pivot, Vector2 position, Vector2 size, Color color, string text = "") {
-			GameObject toReturn = new GameObject ("PEngineGUI");
-			toReturn.transform.SetParent (parent);
-
-			RectTransform rectT = toReturn.AddComponent<RectTransform> ();
-			rectT.anchorMin = minAnchor;
-			rectT.anchorMax = maxAnchor;
-			rectT.pivot = pivot;
-			rectT.anchoredPosition = position;
-			rectT.sizeDelta = size;
-			toReturn.AddComponent<Image> ().color = color;
-
-			CreateUIText (
-				toReturn.transform,
-				Vector2.zero,
-				Vector2.one,
-				new Vector2 (0.5f, 0.5f),
-				Vector2.zero,
-				Vector2.zero,
-				16,
-				text
-			);
-
-			return toReturn;
-		}
-
-		public Dropdown CreateUIDropdown (Transform parent, Vector2 minAnchor, Vector2 maxAnchor, Vector2 pivot, Vector2 position, Vector2 size, Color color, List<string> options, UnityEngine.Events.UnityAction<int> action) {
-			GameObject toReturn = CreateUIPanel (parent, minAnchor, maxAnchor, pivot, position, size, color);
-			Dropdown dropdown = toReturn.AddComponent<Dropdown> ();
-
-			GameObject template = CreateUIPanel (toReturn.transform, new Vector2 (0, 1), new Vector2 (0, 1), new Vector2 (0, 1), new Vector2 (0, -size.y), size, color);
-			Destroy (template.GetComponentInChildren<Text> ().gameObject);
-			template.SetActive (false);
-			Canvas temp = template.AddComponent<Canvas> ();
-			temp.overrideSorting = true;
-			temp.sortingOrder = 30000;
-			template.AddComponent<GraphicRaycaster> ();
-			template.AddComponent<CanvasGroup> ();
-
-			GameObject item = CreateUIPanel (template.transform, new Vector2 (0, 1), new Vector2 (0, 1), new Vector2 (0, 1), Vector2.zero, size, color);
-			item.AddComponent<Toggle> ();
-
-			dropdown.captionText = toReturn.GetComponentInChildren<Text> ();
-			dropdown.template = template.GetComponent<RectTransform> ();
-			dropdown.itemText = item.GetComponentInChildren<Text> ();
-
-			dropdown.options.Clear ();
-			for (int i = 0; i < options.Count; ++i) {
-				dropdown.options.Add (new Dropdown.OptionData (options[i]));
-			}
-			dropdown.value = engineType;
-			dropdown.RefreshShownValue ();
-			dropdown.onValueChanged.AddListener (action);
-
-			return dropdown;
-		}
-
-		public Text CreateUIText (Transform parent, Vector2 minAnchor, Vector2 maxAnchor, Vector2 pivot, Vector2 position, Vector2 size, int fontSize, string text = "") {
-			GameObject toReturn = new GameObject ("PEngineGUIText");
-			toReturn.transform.SetParent (parent);
-
-			RectTransform rectT = toReturn.AddComponent<RectTransform> ();
-			rectT.anchorMin = minAnchor;
-			rectT.anchorMax = maxAnchor;
-			rectT.pivot = pivot;
-			rectT.anchoredPosition = position;
-			rectT.sizeDelta = size;
-
-			Text textT = toReturn.AddComponent<Text> ();
-			textT.text = text;
-			textT.fontSize = fontSize;
-			textT.font = Resources.GetBuiltinResource<Font> ("Arial.ttf");
-			textT.alignment = TextAnchor.MiddleCenter;
-
-			return textT;
-		}
-
-		public GameObject CreateUIButton (UnityEngine.Events.UnityAction action, Transform parent, Vector2 minAnchor, Vector2 maxAnchor, Vector2 pivot, Vector2 position, Vector2 size, Color color, string text = "") {
-			GameObject toReturn = CreateUIPanel (parent, minAnchor, maxAnchor, pivot, position, size, color, text);
-
-			toReturn.AddComponent<Button> ().onClick.AddListener (action);
-
-			return toReturn;
-		}
+		bool GUIDone = false;
 
 		public void BuildGUI () {
 			GameObject canvas = new GameObject ("PEngineCanvas");
@@ -289,7 +209,7 @@ namespace ConsoleApp1 {
 			mainBoxRect.anchoredPosition = Vector2.zero;
 			mainBoxRect.sizeDelta = Vector2.zero;
 
-			GameObject mainPanel = CreateUIPanel (
+			GameObject mainPanel = UIUtils.CreateUIPanel (
 				mainBox.transform,
 				Vector2.zero,
 				Vector2.zero,
@@ -300,7 +220,7 @@ namespace ConsoleApp1 {
 				""
 			);//Background
 
-			CreateUIPanel (
+			UIUtils.CreateUIPanel (
 				mainPanel.transform,
 				new Vector2 (0, 1),
 				new Vector2 (0, 1),
@@ -311,7 +231,7 @@ namespace ConsoleApp1 {
 				"Engine configuration"
 			).AddComponent<windowDragger> ().target = mainBox.GetComponent<RectTransform> ();//Dragging bar
 
-			CreateUIButton (
+			UIUtils.CreateUIButton (
 				ToggleGUI,
 				mainPanel.transform,
 				Vector2.one,
@@ -323,7 +243,7 @@ namespace ConsoleApp1 {
 				"X"
 			);//Close
 
-			EngineTypeDropdown = CreateUIDropdown (
+			EngineTypeDropdown = UIUtils.CreateUIDropdown (
 				mainPanel.transform,
 				new Vector2 (0, 1),
 				new Vector2 (0, 1),
@@ -341,12 +261,14 @@ namespace ConsoleApp1 {
 				} else {
 					availableEngines.Add (i);
 					EngineTypeDropdown.options.Add (new Dropdown.OptionData (engineName[i]));
+					if (engineType == i) {
+						EngineTypeDropdown.value = availableEngines.Count;
+					}
 				}
 			}
-			EngineTypeDropdown.value = engineType;
 			EngineTypeDropdown.RefreshShownValue ();
 
-			EngineAdvDropdown = CreateUIDropdown (
+			EngineAdvDropdown = UIUtils.CreateUIDropdown (
 				mainPanel.transform,
 				new Vector2 (0, 1),
 				new Vector2 (0, 1),
@@ -361,7 +283,7 @@ namespace ConsoleApp1 {
 			EngineAdvDropdown.value = engineAdv;
 			EngineAdvDropdown.RefreshShownValue ();
 
-			VIspText = CreateUIText (
+			VIspText = UIUtils.CreateUIText (
 				mainPanel.transform,
 				new Vector2 (0.0f, 1.0f),
 				new Vector2 (0.0f, 1.0f),
@@ -372,7 +294,7 @@ namespace ConsoleApp1 {
 				"Placeholder VacISP"
 			);//Vacuum ISP text
 
-			AIspText = CreateUIText (
+			AIspText = UIUtils.CreateUIText (
 				mainPanel.transform,
 				new Vector2 (0.0f, 1.0f),
 				new Vector2 (0.0f, 1.0f),
@@ -383,7 +305,7 @@ namespace ConsoleApp1 {
 				"Placeholder AtmISP"
 			);//atm ISP text
 
-			ThrustText = CreateUIText (
+			ThrustText = UIUtils.CreateUIText (
 				mainPanel.transform,
 				new Vector2 (0.0f, 1.0f),
 				new Vector2 (0.0f, 1.0f),
@@ -394,7 +316,7 @@ namespace ConsoleApp1 {
 				"Placeholder Thrust"
 			);//thrust text
 
-			MassText = CreateUIText (
+			MassText = UIUtils.CreateUIText (
 				mainPanel.transform,
 				new Vector2 (0.0f, 1.0f),
 				new Vector2 (0.0f, 1.0f),
@@ -405,13 +327,14 @@ namespace ConsoleApp1 {
 				"Placeholder Mass"
 			);//mass text
 
-			UpdateEngine ();
+			GUIDone = true;
+			UpdateText ();
 			mainBox.SetActive (false);
 		}
 
 		void ResetEngineAdvDropdown (bool changedType = true) {
 			EngineAdvDropdown.options.Clear ();
-			EngineAdvDropdown.options.Add (new Dropdown.OptionData ("Early"));
+			if (upgradeLevels[engineType] >= 1) EngineAdvDropdown.options.Add (new Dropdown.OptionData ("Early"));
 			if (upgradeLevels[engineType] >= 2) EngineAdvDropdown.options.Add (new Dropdown.OptionData ("Mid"));
 			if (upgradeLevels[engineType] >= 3) EngineAdvDropdown.options.Add (new Dropdown.OptionData ("Modern"));
 

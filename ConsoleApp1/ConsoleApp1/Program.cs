@@ -156,6 +156,9 @@ namespace ConsoleApp1 {
 				p.engineType = this.engineType;
 				p.engineAdv = this.engineAdv;
 				p.ActuallyUpdateEngine (true);
+				if (p.GUIDone) {
+					p.UpdateDropdownValues ();
+				}
 			}
 		}
 
@@ -179,6 +182,16 @@ namespace ConsoleApp1 {
 			AIspText.text = $"Sea level ISP: {engineBaseAISP[engineType * 3 + engineAdv]}s";
 			ThrustText.text = $"Vacuum thrust: {engineBaseThrust[engineType * 3 + engineAdv]}kN";
 			MassText.text = $"Mass: {engineBaseMass[engineType * 3 + engineAdv]}t";
+		}
+
+		public void UpdateDropdownValues () {
+			GUIDone = false;
+			EngineTypeDropdown.value = availableEngines.FindIndex (a => availableEngines[a] == engineType);
+			EngineAdvDropdown.value = engineAdv;
+
+			EngineTypeDropdown.RefreshShownValue ();
+			EngineAdvDropdown.RefreshShownValue ();
+			GUIDone = true;
 		}
 
 		Canvas mainCanvas;

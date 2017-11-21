@@ -116,6 +116,12 @@ namespace ConsoleApp1 {
 		[KSPField (isPersistant = true, guiActive = false)]
 		int engineAdv;
 
+		[KSPField (isPersistant = true, guiActive = false)]
+		Vector3 topNode;
+
+		[KSPField (isPersistant = true, guiActive = false)]
+		Vector3 bottomNode;
+
 		//-=-=-=
 
 		bool GUIOpen = false;
@@ -129,6 +135,51 @@ namespace ConsoleApp1 {
 			}
 			GUIOpen = !GUIOpen;
 			mainBox.SetActive (GUIOpen);
+		}
+
+		[KSPEvent (active = true, advancedTweakable = false, guiActive = false, guiActiveEditor = true, guiName = "test")]
+		public void test () {
+			MoveNode (new Vector3 (0, 1, 0), new Vector3 (0, -1, 0));
+		}
+
+		public PEngine () {
+			if (topNode == null) {
+				topNode = new Vector3 (0, 0.9f, 0);
+			}
+			if (bottomNode == null) {
+				bottomNode = new Vector3 (0, -0.6f, 0);
+			}
+		}
+
+		public void MoveNode (Vector3 newTopPosition, Vector3 newBottomPosition) {
+			this.topNode = newTopPosition;
+			this.bottomNode = newBottomPosition;
+			ActuallyMoveNode (newTopPosition, newBottomPosition);
+
+			foreach (Part i in this.part.symmetryCounterparts) {
+				Debug.Log ("co?");
+				Debug.Log (i);
+				Debug.Log (i.transform);
+				Debug.Log (i.transform.position);
+				i.Modules.GetModule<PEngine> ().topNode = newTopPosition;
+				i.Modules.GetModule<PEngine> ().bottomNode = newBottomPosition;
+				i.Modules.GetModule<PEngine> ().ActuallyMoveNode (newTopPosition, newBottomPosition);
+			}
+		}
+
+		public void ActuallyMoveNode (Vector3 newTopPosition, Vector3 newBottomPosition) {
+			
+			Vector3 topDelta = newTopPosition - (part.attachNodes[0].position);
+			Vector3 bottomDelta = newBottomPosition - (part.attachNodes[1].position);
+
+			part.attachNodes[0].position = newTopPosition;
+			part.attachNodes[1].position = newBottomPosition;
+
+			this.part.transform.position -= (topDelta);
+
+			if (this.part.attachNodes[1].attachedPart != null) {
+				this.part.attachNodes[1].attachedPart.transform.position += (bottomDelta);
+			}
 		}
 
 		public void ChangeEngineType (int type) {
@@ -360,33 +411,27 @@ namespace ConsoleApp1 {
 
 		public void Start () {
 			UpdateEngine (false);
+			ActuallyMoveNode (topNode, bottomNode);
 		}
+
+		public void OnEnable () {
+			a = GameObject.CreatePrimitive (PrimitiveType.Capsule);
+			a.transform.SetParent (this.part.gameObject.transform);
+			a.transform.localPosition = Vector3.zero;
+			a.AddComponent<CapsuleCollider> ();
+		}
+
+		GameObject a;
 
 		public void OnDisable () {
 			if (mainBox != null) {
 				Destroy (mainBox);
 			}
-		}
 
-		/*
-		void OnGUI () {
-			if (GUIOpen) {
-				GUI.Box (new Rect (300, 300, 900, 600), "Procedural Engine GUI");
-
-				if (GUI.Button (new Rect (1160, 300, 40, 40), "X")) {
-					GUIOpen = false;
-				}
-
-				if (GUI.Button (new Rect (320, 320, 140, 40), "Add ISP")) {
-					AddISP ();
-				}
-
-				if (GUI.Button (new Rect (320, 380, 140, 40), "Remove ISP")) {
-					RemoveISP ();
-				}
+			if (a != null) {
+				Destroy (a);
 			}
 		}
-		*/
 
 		[KSPAction ("Akcja")]
 		public void myAction (KSPActionParam param) {
